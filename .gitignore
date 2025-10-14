@@ -1,8 +1,11 @@
+src/experimental_data/plots/*
+!src/experimental_data/plots/__init__.py
 licensed
 sandbox
 .benchmarks
 lib
 .idea
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
