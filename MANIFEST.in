@@ -1,0 +1,10 @@
+include VERSION
+include LICENSE
+include README.md
+include README.rst
+recursive-include src *.py
+exclude tests/*
+exclude sandbox/*
+exclude setup.cfg
+exclude htmlcov/*
+exclude .benchmarks/*
