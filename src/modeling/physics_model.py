@@ -245,43 +245,6 @@ def Pzeta_at_k(k: float,
     }
 
 
-def __Pzeta_at_k(k: float,
-                 N: np.ndarray, a: np.ndarray, H: np.ndarray, eta: np.ndarray, epsH_arr: np.ndarray,
-                 P: CosmologyParams) -> Dict[str, float]:
-    # Evaluate scalar/tensor spectra and consistency at freeze-out
-    N_star, j = find_N_star_for_k(k, N, a, H, P.c_s_scalar)
-    H_star = H[j]
-    eps_star = epsH_arr[j]
-    c_s_star = P.c_s_scalar
-
-    # Occupancy factor
-    nbar = float(nbar_k(np.array([k]), P.n0, P.k0, P.sigma_ln_k)[0])
-    amp = 1.0 + 2.0 * nbar
-
-    # Scalar spectrum (M_pl = 1)
-    Pz = amp * (H_star ** 2) / (8.0 * math.pi ** 2 * eps_star * c_s_star)
-
-    # Tensor spectrum and r
-    Pt = 2.0 * (H_star ** 2) / (math.pi ** 2)
-    r = Pt / Pz
-
-    # Tensor tilt and generalized consistency
-    n_t = -2.0 * eps_star
-    ratio = r / (-8.0 * n_t) if n_t != 0 else np.nan
-
-    # Finite-time ring-down (damped)
-    eta0 = float(np.interp(P.N0, N, eta))
-    etastar = float(eta[j])
-    delta_eta = max(etastar - eta0, 0.0)
-    damp = math.exp(-P.Gamma_over_H * delta_eta * H_star)
-    ring = 1.0 + P.A_ring * math.cos(2.0 * P.c_s_scalar * k * eta0 + P.phi_ring) * damp
-    Pz_ring = Pz * ring
-
-    return dict(k=k, N_star=N_star, H_star=H_star, eps_star=eps_star, c_s_star=c_s_star,
-                nbar=nbar, Pz=Pz, Pz_ring=Pz_ring, Pt=Pt, r=r, n_t=n_t,
-                consistency_ratio=ratio, ring_damp=damp, eta0=eta0, eta_star=etastar)
-
-
 # -------------------
 # Diagnostics
 # -------------------

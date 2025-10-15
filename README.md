@@ -1,6 +1,5 @@
 # Self-Instantiated Stress–Energy: A Predictive Framework for Matter and Metric in Closed-System Cosmology. Modeling
 
----
 
 ## Overview
 
