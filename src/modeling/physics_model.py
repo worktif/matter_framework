@@ -279,7 +279,6 @@ def Pzeta_at_k(k: float,
     }
 
 
-
 # Diagnostics
 def stability_z2(N: np.ndarray, a: np.ndarray, epsH_arr: np.ndarray, c_s_scalar: float) -> np.ndarray:
     # z^2 = 2 a^2 ε_H / c_s^2 (M_pl=1)

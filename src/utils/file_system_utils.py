@@ -51,66 +51,72 @@ def save_data(res: dict, out_dir_rel: str = "../experimental_data/data") -> list
     current_dir = os.path.dirname(__file__)
     out_dir = os.path.join(current_dir, out_dir_rel)
     os.makedirs(out_dir, exist_ok=True)
+    output_extended_folder_dat = os.path.join(out_dir, 'extended')
+    os.makedirs(output_extended_folder_dat, exist_ok=True)
 
     # Derived diagnostics used in figures
     resid = conservation_residual(res["N"], res["rho_ent"], res["w"])
     z2 = stability_z2(res["N"], res["a"], res["eps"], P.c_s_scalar)
     target_consistency = P.c_s_scalar / (1.0 + 2.0 * res["nbar"])
 
-    # CSV files – one per figure
-    _write_csv(os.path.join(out_dir, "N_Hubble_rate.csv"),
-               {"N": res["N"], "H_over_H0": res["H"]})  # H already includes H0
-
-    _write_csv(os.path.join(out_dir, "N_w_ent.csv"),
-               {"N": res["N"], "w_ent": res["w"]})
-
-    _write_csv(os.path.join(out_dir, "N_rho_ent.csv"),
-               {"N": res["N"], "rho_ent_over_rhoc0": res["rho_ent"]})
-
     _write_csv(os.path.join(out_dir, "N_conservation_residual.csv"),
                {"N": res["N"], "residual": resid})
-
-    _write_csv(os.path.join(out_dir, "N_epsH.csv"),
-               {"N": res["N"], "eps_H": res["eps"]})
-
-    _write_csv(os.path.join(out_dir, "N_z2_MukhanovSasaki.csv"),
-               {"N": res["N"], "z2": z2})
-
-    _write_csv(os.path.join(out_dir, "N_conformal_time_eta.csv"),
-               {"N": res["N"], "eta": res["eta"]})
-
-    _write_csv(os.path.join(out_dir, "k_vs_Nstar.csv"),
-               {"k_code": res["ks"], "N_star": res["N_star"]})
 
     _write_csv(os.path.join(out_dir, "k_vs_nbar.csv"),
                {"k_code": res["ks"], "nbar": res["nbar"]})
 
-    _write_csv(os.path.join(out_dir, "k_vs_Pzeta_ring.csv"),
-               {"k_code": res["ks"], "P_zeta_ring": res["Pz_ring"]})
-
-    _write_csv(os.path.join(out_dir, "k_vs_Pzeta_no_ring.csv"),
-               {"k_code": res["ks"], "P_zeta": res["Pz"]})
-
-    _write_csv(os.path.join(out_dir, "k_vs_Pt.csv"),
-               {"k_code": res["ks"], "P_t": res["Pt"]})
-
-    _write_csv(os.path.join(out_dir, "k_vs_r.csv"),
-               {"k_code": res["ks"], "r": res["r"]})
-
-    _write_csv(os.path.join(out_dir, "k_vs_n_t.csv"),
-               {"k_code": res["ks"], "n_t": res["n_t"]})
+    _write_csv(os.path.join(out_dir, "k_vs_Nstar.csv"),
+               {"k_code": res["ks"], "N_star": res["N_star"]})
 
     _write_csv(os.path.join(out_dir, "k_vs_consistency_ratio.csv"),
                {"k_code": res["ks"], "r_over_minus8nt": res["ratio"]})
 
-    _write_csv(os.path.join(out_dir, "k_vs_scalar_tilt.csv"),
-               {"k_code": res["ks"], "n_s_minus_1": res["n_s_minus_1"]})
+    _write_csv(os.path.join(out_dir, "N_z2_MukhanovSasaki.csv"),
+               {"N": res["N"], "z2": z2})
 
     _write_csv(os.path.join(out_dir, "k_vs_ring_down_damping.csv"),
                {"k_code": res["ks"], "ring_damp": res["ring_damp"]})
 
+    _write_csv(os.path.join(out_dir, "k_vs_Pzeta_ring.csv"),
+               {"k_code": res["ks"], "P_zeta_ring": res["Pz_ring"]})
+
     _write_csv(os.path.join(out_dir, "k_vs_consistency_target.csv"),
                {"k_code": res["ks"], "cs_over_1plus2nbar": target_consistency})
+
+    _write_csv(os.path.join(out_dir, "k_vs_Pt.csv"),
+               {"k_code": res["ks"], "P_t": res["Pt"]})
+
+    _write_csv(os.path.join(out_dir, "k_vs_n_t.csv"),
+               {"k_code": res["ks"], "n_t": res["n_t"]})
+
+
+
+
+
+    # CSV files – one per figure
+    _write_csv(os.path.join(output_extended_folder_dat, "N_Hubble_rate.csv"),
+               {"N": res["N"], "H_over_H0": res["H"]})  # H already includes H0
+
+    _write_csv(os.path.join(output_extended_folder_dat, "N_w_ent.csv"),
+               {"N": res["N"], "w_ent": res["w"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "N_rho_ent.csv"),
+               {"N": res["N"], "rho_ent_over_rhoc0": res["rho_ent"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "N_epsH.csv"),
+               {"N": res["N"], "eps_H": res["eps"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "N_conformal_time_eta.csv"),
+               {"N": res["N"], "eta": res["eta"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "k_vs_Pzeta_no_ring.csv"),
+               {"k_code": res["ks"], "P_zeta": res["Pz"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "k_vs_r.csv"),
+               {"k_code": res["ks"], "r": res["r"]})
+
+    _write_csv(os.path.join(output_extended_folder_dat, "k_vs_scalar_tilt.csv"),
+               {"k_code": res["ks"], "n_s_minus_1": res["n_s_minus_1"]})
 
     # Diagnostics and metadata
     diagnostics = {
@@ -170,12 +176,10 @@ def save_data(res: dict, out_dir_rel: str = "../experimental_data/data") -> list
         "k_vs_scalar_tilt.csv -> Scalar_tilt_finite_difference.png",
         "k_vs_ring_down_damping.csv -> Ring_down_damping_factor.png",
         "k_vs_consistency_target.csv -> Target_curve_for_generalized_consistency.png",
-        "all_arrays_v1.npz -> NPZ bundle with all arrays + params + diagnostics"
+        "all_arrays_v410.npz -> NPZ bundle with all arrays + params + diagnostics"
     ]
 
     with open(os.path.join(out_dir, "MANIFEST.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(manifest_lines))
 
     return manifest_lines
-
-
