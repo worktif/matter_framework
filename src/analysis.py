@@ -7,7 +7,9 @@ import numpy as np
 
 from src.modeling.physics_model import CosmologyParams, k_phys_to_code, compute_background_and_spectra, \
     conservation_residual, \
-    stability_z2, plot_charts
+    stability_z2
+from src.utils.file_system_utils import save_data
+from src.utils.plot_utils import plot_charts
 
 # -------------------------------------------
 #     Run Matter Framework Modeling
@@ -25,6 +27,7 @@ if __name__ == "__main__":
     )
     P.finalize()
 
+    # Original
     result = compute_background_and_spectra(
         P,
         N_min=-10.0, N_max=6.0, nN=4001,
@@ -34,11 +37,9 @@ if __name__ == "__main__":
     # Print a compact numeric summary
     resid = conservation_residual(result["N"], result["rho_ent"], result["w"])
     z2 = stability_z2(result["N"], result["a"], result["eps"], P.c_s_scalar)
-    print(
-        "Conservation residual (L1, Linf):",
-        float(np.mean(np.abs(resid))),
-        float(np.max(np.abs(resid)))
-    )
     print("Stability: min z^2 =", float(np.min(z2)), "; c_s^2 =", P.c_s_scalar ** 2)
     # Draw all figures
     plot_charts(result)
+
+    # Save analysis data to files
+    save_data(result)
