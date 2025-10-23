@@ -43,7 +43,9 @@ Below is an example of initializing a simulation and producing results:
 
 .. code-block:: python
 
-   from src.modeling.physics_model import CosmologyParams, compute_background_and_spectra, k_phys_to_code, plot_charts
+   from src.modeling.physics_model import CosmologyParams, compute_background_and_spectra, k_phys_to_code
+   from src.utils.file_system_utils import save_data
+   from src.utils.plot_utils import plot_charts
 
    # Define cosmological parameters
    P = CosmologyParams(
@@ -69,3 +71,6 @@ Below is an example of initializing a simulation and producing results:
 
    # Plot and save simulation results
    plot_charts(result)
+
+   # Save analysis data to files
+   save_data(result)
