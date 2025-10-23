@@ -138,7 +138,7 @@ def save_data(res: dict, out_dir_rel: str = "../experimental_data/data") -> list
         json.dump(params_dict, f, indent=2)
 
     # NPZ bundle
-    np.savez(os.path.join(out_dir, "experimental_data_v410.npz"),
+    np.savez(os.path.join(out_dir, "experimental_data_v411.npz"),
              # background
              N=res["N"], a=res["a"], H_over_H0=res["H"], eps_H=res["eps"],
              w_ent=res["w"], rho_ent_over_rhoc0=res["rho_ent"], eta=res["eta"],
