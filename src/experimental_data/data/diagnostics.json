@@ -1,0 +1,11 @@
+{
+  "z2_min": 7.967322403782587e-09,
+  "cs2": 1.0,
+  "pivot_k_phys_Mpc^-1": 0.05,
+  "pivot_k_code": 222.3979658753709,
+  "units": {
+    "k_code_to_k_phys_Mpc^-1": "k_phys = (H0/c) * k_code",
+    "H_plotted": "H_over_H0 (code units)",
+    "rho_ent": "dimensionless fraction of critical density (rho_ent/rho_c0)"
+  }
+}

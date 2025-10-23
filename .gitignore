@@ -1,9 +1,3 @@
-src/experimental_data/plots/*
-!src/experimental_data/plots/__init__.py
-!src/experimental_data/plots/SHA256SUMS.txt
-src/experimental_data/data/*
-!src/experimental_data/data/__init__.py
-!/src/experimental_data/data/SHA256SUMS.txt
 licensed
 sandbox
 .benchmarks

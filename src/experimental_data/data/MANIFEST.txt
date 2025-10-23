@@ -1,0 +1,20 @@
+# Manifest: CSV -> figure mapping
+N_Hubble_rate.csv -> Hubble_rate.png
+N_w_ent.csv -> Entanglement_Equation_of_State.png
+N_rho_ent.csv -> Entanglement_Energy_Density.png
+N_conservation_residual.csv -> Conservation_Residual.png
+N_epsH.csv -> Hubble_Slow_Roll_Parameter.png
+N_z2_MukhanovSasaki.csv -> Mukhanov_Sasaki_Variable.png
+N_conformal_time_eta.csv -> Conformal_Time.png
+k_vs_Nstar.csv -> Freeze_out_e_fold_N.png
+k_vs_nbar.csv -> Decoherence_occupancy_profile.png
+k_vs_Pzeta_ring.csv -> Scalar_Power_Spectrum.png
+k_vs_Pzeta_no_ring.csv -> Post_Act_Occupation_Number_Entanglement-Enhanced Occupation.png
+k_vs_Pt.csv -> Tensor_Power_Spectrum.png
+k_vs_r.csv -> Tensor_to_Scalar_Ratio.png
+k_vs_n_t.csv -> Tensor_tilt_n_t.png
+k_vs_consistency_ratio.csv -> Generalized_consistency_ratio.png
+k_vs_scalar_tilt.csv -> Scalar_tilt_finite_difference.png
+k_vs_ring_down_damping.csv -> Ring_down_damping_factor.png
+k_vs_consistency_target.csv -> Target_curve_for_generalized_consistency.png
+all_arrays_v410.npz -> NPZ bundle with all arrays + params + diagnostics
