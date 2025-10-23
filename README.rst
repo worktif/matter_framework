@@ -1,4 +1,4 @@
-Self-Instantiated Stress–Energy: A Predictive Framework for Matter and Metric in Closed-System Cosmology. Modeling
+Internal Decoherence in a Closed-System Cosmology Induces an Effective Stress-Energy Component and Governs Early-Universe Dynamics. Modeling
 ==============================================================================================================
 
 Overview

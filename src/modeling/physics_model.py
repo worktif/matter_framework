@@ -1,5 +1,5 @@
 # Python code to compute and visualise all key results from the manuscript
-# "Self-Instantiated Stress–Energy: A Predictive Framework for Matter and Metric in Closed-System Cosmology"
+# "Internal Decoherence in a Closed-System Cosmology Induces an Effective Stress-Energy Component and Governs Early-Universe Dynamics"
 # experimental part. This script is self-contained, does not read/write files, and produces figures on screen.
 # Charts: one plot per figure (no subplots), matplotlib only, no explicit colors.
 
