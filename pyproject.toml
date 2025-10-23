@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "matter_framework"
-version = "4.1.0-alpha.0"
+version = "4.1.1"
 description = "We present a technical validation for complete, testable cosmological framework in which the Universe begins in a globally coherent quantum state and the first local act of decoherence inside the closed system creates its own environment."
 readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.8"
