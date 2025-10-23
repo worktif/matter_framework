@@ -1,22 +1,56 @@
 # Python code to compute and visualise all key results from the manuscript
-# "Self-Instantiated Stress–Energy: A Predictive Framework for Matter and Metric in Closed-System Cosmology"
+# "Internal Decoherence in a Closed-System Cosmology Induces an Effective Stress-Energy Component and Governs Early-Universe Dynamics"
 # experimental part. This script is self-contained, does not read/write files, and produces figures on screen.
 # Charts: one plot per figure (no subplots), matplotlib only, no explicit colors.
 
 import math
-import os
 from dataclasses import dataclass
-from typing import Dict, Any, Tuple
+from typing import Tuple, Optional
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
-# -----------------------------
 # Parameters
-# -----------------------------
 @dataclass
 class CosmologyParams:
+    """
+    Class representing cosmological parameters including an entanglement fluid component.
+
+    :ivar Omega_r0: Present-day density parameter for radiation.
+    :type Omega_r0: float
+    :ivar Omega_m0: Present-day density parameter for matter.
+    :type Omega_m0: float
+    :ivar Omega_L0: Present-day density parameter for dark energy.
+    :type Omega_L0: float
+    :ivar Omega_ent0: Present-day density parameter for the entanglement fluid.
+    :type Omega_ent0: float
+    :ivar Omega_k0: Present-day curvature density parameter (inferred if None).
+    :type Omega_k0: float
+    :ivar H0: Present-day Hubble constant [km/s/Mpc].
+    :type H0: float
+    :ivar epsilon: Equation-of-state deformation parameter for the entanglement fluid.
+    :type epsilon: float
+    :ivar DeltaN: Duration of entanglement-fluid influence in e-folds.
+    :type DeltaN: float
+    :ivar N0: Initial e-folding reference point for the entanglement-fluid epoch.
+    :type N0: float
+    :ivar c_s_ent: Dimensionless sound speed of the entanglement fluid (0 ≤ c_s_ent ≤ 1).
+    :type c_s_ent: float
+    :ivar c_s_scalar: Dimensionless sound speed for scalar perturbations.
+    :type c_s_scalar: float
+    :ivar n0: Amplitude of the decohered occupancy profile.
+    :type n0: float
+    :ivar k0: Central scale of the decohered log-normal bump.
+    :type k0: float
+    :ivar sigma_ln_k: Width of the log-normal profile in log(k) space.
+    :type sigma_ln_k: float
+    :ivar Gamma_over_H: Dimensionless ratio of decoherence damping rate to Hubble rate during ring-down.
+    :type Gamma_over_H: float
+    :ivar A_ring: Amplitude of the ring-down oscillations.
+    :type A_ring: float
+    :ivar phi_ring: Phase offset of the ring-down oscillations [radians].
+    :type phi_ring: float
+    """
     # Present-day density parameters (Ω_k0 inferred if None)
     Omega_r0: float = 9.2e-5
     Omega_m0: float = 0.315
@@ -116,9 +150,9 @@ def find_N_star_for_k(k: float,
                       c_s_scalar: float,
                       tol: float = 1e-8,
                       max_iter: int = 64,
-                      window_mask: 'Optional[np.ndarray]' = None,
+                      window_mask: Optional[np.ndarray] = None,
                       prefer: str = "rightmost",
-                      N_guess: 'Optional[float]' = None) -> Tuple[float, int]:
+                      N_guess: Optional[float] = None) -> Tuple[float, int]:
     """
     Solve c_s * k = a(N) * H(N) on a chosen window of N.
     - If `window_mask` is provided, roots are searched ONLY where window_mask is True.
@@ -245,18 +279,8 @@ def Pzeta_at_k(k: float,
     }
 
 
-# -------------------
+
 # Diagnostics
-# -------------------
-def conservation_residual(N: np.ndarray, rho_ent: np.ndarray, w_ent_arr: np.ndarray) -> np.ndarray:
-    # Residual of: d ln ρ_ent / dN + 3(1+w_ent) = 0
-    dlnrho_dN = np.gradient(np.log(rho_ent), N, edge_order=2)
-    R = dlnrho_dN + 3.0 * (1.0 + w_ent_arr)
-    R[0] = np.nan
-    R[-1:] = np.nan
-    return R
-
-
 def stability_z2(N: np.ndarray, a: np.ndarray, epsH_arr: np.ndarray, c_s_scalar: float) -> np.ndarray:
     # z^2 = 2 a^2 ε_H / c_s^2 (M_pl=1)
     return 2.0 * (a ** 2) * epsH_arr / (c_s_scalar ** 2)
@@ -354,10 +378,7 @@ def spectra_from_Nstar(k: float,
     }
 
 
-# -----------------------------
 # Main computation & plotting
-# -----------------------------
-
 def finite_diff_log_slope(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     """
     Compute d ln y / d ln x with a 5-point stencil in the interior and
@@ -479,261 +500,12 @@ def compute_background_and_spectra(P: CosmologyParams,
                 etaH_vals=etaH_vals)
 
 
-def plot_charts(res: Dict[str, Any]):
-    current_dir = os.path.dirname(__file__)
-    output_folder_dat = f"{current_dir}/../experimental_data/plots"
-    os.makedirs(output_folder_dat, exist_ok=True)
+def conservation_residual(N: np.ndarray, rho_ent: np.ndarray, w_ent_arr: np.ndarray) -> np.ndarray:
+    # Residual of: d ln ρ_ent / dN + 3(1+w_ent) = 0
+    # Guard against log(0) to avoid NaN in diagnostics:
+    dlnrho_dN = np.gradient(np.log(np.clip(rho_ent, 1e-300, None)), N, edge_order=2)
+    R = dlnrho_dN + 3.0 * (1.0 + w_ent_arr)
+    R[0] = np.nan
+    R[-1:] = np.nan
 
-    P: CosmologyParams = res["P"]
-
-    # 1) H(N)
-    plt.figure()
-    plt.plot(res["N"], res["H"])
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    plt.ylabel("H/H0", fontsize=12)
-    plt.legend()
-    plt.title("Hubble rate", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Hubble_rate.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-
-    # 2) w_ent(N)
-    plt.figure()
-    plt.plot(res["N"], res["w"])
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    # w_{\mathrm{ent}}(N)
-    plt.ylabel("w_ent(N) – Entanglement Equation of State", fontsize=12)
-    plt.title("Entanglement equation of state", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Entanglement_Equation_of_State.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-
-    # 3) rho_ent(N)/rho_c0
-    plt.figure()
-    plt.plot(res["N"], res["rho_ent"])
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    plt.xscale('log')
-    # \rho_{\mathrm{ent}}/\rho_{c0}
-    plt.ylabel("rho_ent / rho_c0 – Entanglement Energy Density", fontsize=12)
-    plt.yscale('log')
-    plt.title("Entanglement density (fraction of critical)", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Entanglement_Energy_Density.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-
-    # 4) Conservation residual
-    plt.figure()
-    resid = conservation_residual(res["N"], res["rho_ent"], res["w"])
-    plt.plot(res["N"], resid)
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    plt.ylabel("d ln rho_ent / dN + 3(1 + w_ent)\nConservation Residual", fontsize=12)
-    plt.title("Conservation residual (should be ~0)", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Conservation_Residual.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-
-    # 5) epsilon_H(N)
-    plt.figure()
-    plt.plot(res["N"], res["eps"])
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    plt.xscale('log')
-    #  \epsilon_H \equiv -\frac{\dot{H}}{H^2}
-    plt.ylabel("epsilon_H – Hubble Slow-Roll Parameter", fontsize=12)
-    plt.title("Hubble slow-roll parameter", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Hubble_Slow_Roll_Parameter.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 6) z^2(N)
-    plt.figure()
-    z2 = stability_z2(res["N"], res["a"], res["eps"], P.c_s_scalar)
-    plt.plot(res["N"], z2)
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    # z^2(N), with z \equiv a \sqrt{2\epsilon_H}
-    plt.ylabel("z^2 – Mukhanov-Sasaki Variable", fontsize=12)
-    plt.title("Stability: z^2 = 2 a^2 epsilon_H / c_s^2", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Mukhanov_Sasaki_Variable.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 7) Conformal time eta(N)
-    plt.figure()
-    plt.plot(res["N"], res["eta"])
-    plt.xlabel("N = ln a (Number of e-folds)", fontsize=12)
-    # \eta(N)
-    plt.ylabel("eta – Conformal Time", fontsize=12)
-    plt.title("Conformal time", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Conformal_Time.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 8) Freeze-out map: N_*(k)
-    plt.figure()
-    plt.plot(res["ks"], res["N_star"])
-    plt.xlabel("k", fontsize=12)
-    # N_*(k)
-    plt.ylabel("N_* (freeze-out) – Horizon Exit Time", fontsize=12)
-    plt.title("Freeze-out e-fold N_* vs k (c_s k = aH)", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Freeze_out_e_fold_N.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 9) nbar(k)
-    plt.figure()
-    plt.plot(res["ks"], res["nbar"])
-    plt.xlabel("k", fontsize=12)
-    # \bar{n}_k
-    plt.ylabel("nbar(k) – Entanglement-Enhanced Occupation", fontsize=12)
-    plt.title("Decohered occupancy profile", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Decoherence_occupancy_profile.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 10) P_zeta(k) (with ring-down)
-    plt.figure()
-    plt.loglog(res["ks"], res["Pz_ring"])
-    plt.xlabel("k", fontsize=12)
-    # \mathcal{P}_\zeta(k)
-    plt.ylabel("P_zeta(k) – Scalar Power Spectrum", fontsize=12)
-    plt.title("Scalar power spectrum (with ring-down)", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Scalar_Power_Spectrum.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 11) P_zeta(k) (no ring-down)
-    plt.figure()
-    plt.loglog(res["ks"], res["Pz"])
-    plt.xlabel("k", fontsize=12)
-    # \bar{n}_k
-    plt.ylabel("P_zeta(k) [no ring] – Entanglement-Enhanced Occupation", fontsize=12)
-    plt.title("Scalar power spectrum (no ring-down)", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Post_Act_Occupation_Number_Entanglement-Enhanced Occupation.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 12) P_t(k)
-    plt.figure()
-    plt.loglog(res["ks"], res["Pt"])
-    plt.xlabel("k", fontsize=12)
-    # \mathcal{P}_t(k)
-    plt.ylabel("P_t(k) – Tensor Power Spectrum", fontsize=12)
-    plt.title("Tensor power spectrum", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Tensor_Power_Spectrum.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 13) r(k)
-    plt.figure()
-    plt.loglog(res["ks"], res["r"])
-    plt.xlabel("k", fontsize=12)
-    # r(k) \equiv \frac{\mathcal{P}t(k)}{\mathcal{P}\zeta(k)}
-    plt.ylabel("r(k) – Tensor-to-Scalar Ratio", fontsize=12)
-    plt.title("Tensor-to-scalar ratio", fontsize=13)
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Tensor_to_Scalar_Ratio.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 14) n_t(k)
-    plt.figure()
-    plt.plot(res["ks"], res["n_t"])
-    plt.xlabel("k", fontsize=12)
-    # n_t(k) \equiv \frac{d \ln \mathcal{P}_t(k)}{d \ln k}
-    plt.ylabel("n_t(k) – Tensor Tilt", fontsize=12)
-    plt.title("Tensor tilt n_t", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Tensor_tilt_n_t.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 15) Generalized consistency ratio
-    plt.figure()
-    plt.plot(res["ks"], res["ratio"])
-    plt.xlabel("k", fontsize=12)
-    # \frac{r}{-8 n_t}
-    plt.ylabel("r / (-8 n_t) – Consistency Ratio", fontsize=12)
-    plt.title("Generalized consistency ratio", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Generalized_consistency_ratio.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 16) n_s - 1
-    plt.figure()
-    plt.plot(res["ks"], res["n_s_minus_1"])
-    plt.xlabel("k", fontsize=12)
-    # n_s - 1 \equiv \frac{d \ln \mathcal{P}_\zeta(k)}{d \ln k}
-    plt.ylabel("n_s - 1 – Scalar Tilt", fontsize=12)
-    plt.title("Scalar tilt (finite-difference)", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Scalar_tilt_finite_difference.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 17) Ring-down damping factor
-    plt.figure()
-    plt.plot(res["ks"], res["ring_damp"])
-    plt.xlabel("k", fontsize=12)
-    # e^{-\Gamma \Delta \eta}
-    plt.ylabel("exp(-Gamma Δη) – Damping Factor", fontsize=12)
-    plt.title("Ring-down damping factor", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Ring_down_damping_factor.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
-    # 18) Check of consistency at pivot (single point marker)
-    # (Compute c_s / (1+2 nbar(k)) and compare to ratio)
-    plt.figure()
-    target = res["P"].c_s_scalar / (1.0 + 2.0 * res["nbar"])
-    plt.plot(res["ks"], target)
-    plt.xlabel("k", fontsize=12)
-    #  \frac{c_s}{1 + 2\bar{n}_k}
-    plt.ylabel("c_s / (1 + 2 nbar(k)) – Modified Sound Speed", fontsize=12)
-    plt.title("Target curve for generalized consistency", fontsize=13)
-    plt.xscale("log")
-    plt.grid(True, which='both', ls='--', alpha=0.6)
-    plt.tight_layout()
-    output_file = os.path.join(output_folder_dat, f'Target_curve_for_generalized_consistency.png')
-    plt.savefig(output_file)
-    plt.clf()
-    plt.close()
+    return R
